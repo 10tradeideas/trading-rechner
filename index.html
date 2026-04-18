@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TradingFreaks · Renditerechner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --tf-green: #13F97B;
+    --tf-green-dark: #00BB55;
+    --tf-green-deep: #081E14;
+    --tf-green-muted: #172B22;
+    --tf-black: #060606;
+    --tf-offwhite: #ECEAE8;
+    --tf-white: #FFFFFF;
+    --tf-grey-dim: rgba(236, 234, 232, 0.55);
+    --tf-grey-line: rgba(236, 234, 232, 0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--tf-black);
+    color: var(--tf-offwhite);
+    font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+    font-weight: 500;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    min-height: 100vh;
+    background:
+      radial-gradient(1200px 600px at 80% -100px, rgba(19, 249, 123, 0.08), transparent 60%),
+      radial-gradient(900px 500px at -10% 10%, rgba(19, 249, 123, 0.05), transparent 60%),
+      var(--tf-black);
+  }
+
+  .container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 48px 32px 80px;
+  }
+
+  /* Header: official TradingFreaks logo */
+  header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 72px;
+  }
+  header .logo {
+    height: 38px;
+    width: auto;
+    display: block;
+  }
+  @media (max-width: 600px) {
+    header .logo { height: 30px; }
+  }
+
+  /* Hero */
+  .hero {
+    text-align: center;
+    margin-bottom: 56px;
+  }
+  .eyebrow {
+    display: inline-block;
+    padding: 6px 14px;
+    border: 1px solid rgba(19, 249, 123, 0.4);
+    border-radius: 999px;
+    background: rgba(19, 249, 123, 0.08);
+    color: var(--tf-green);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin-bottom: 24px;
+  }
+  h1.headline {
+    font-weight: 700;
+    font-size: clamp(40px, 6.5vw, 76px);
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    color: var(--tf-white);
+    margin-bottom: 20px;
+  }
+  h1.headline em {
+    font-style: normal;
+    color: var(--tf-green);
+  }
+  p.subheadline {
+    font-size: clamp(17px, 1.6vw, 21px);
+    color: var(--tf-grey-dim);
+    max-width: 720px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+
+  /* Calculator card */
+  .calculator {
+    background: linear-gradient(180deg, #0c0c0c 0%, #080808 100%);
+    border: 1px solid var(--tf-grey-line);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 40px 120px -40px rgba(19, 249, 123, 0.15);
+  }
+
+  .calc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: 48px;
+    align-items: start;
+  }
+
+  @media (max-width: 900px) {
+    .calc-grid { grid-template-columns: 1fr; gap: 32px; }
+    .calculator { padding: 24px; }
+    .container { padding: 28px 18px 56px; }
+  }
+
+  /* Controls */
+  .controls { display: flex; flex-direction: column; gap: 28px; }
+
+  .control label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+  .control .label-text {
+    color: var(--tf-grey-dim);
+    font-size: 14px;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+  }
+  .control .label-value {
+    color: var(--tf-white);
+    font-size: 20px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .control .label-value .unit {
+    color: var(--tf-green);
+    margin-left: 2px;
+  }
+
+  /* Slider styling */
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    background: var(--tf-grey-line);
+    border-radius: 999px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    background: var(--tf-green);
+    border-radius: 50%;
+    border: 3px solid var(--tf-black);
+    box-shadow: 0 0 0 1px var(--tf-green), 0 0 18px rgba(19, 249, 123, 0.5);
+    cursor: pointer;
+    transition: transform 0.12s ease;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.12); }
+  input[type="range"]::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    background: var(--tf-green);
+    border-radius: 50%;
+    border: 3px solid var(--tf-black);
+    box-shadow: 0 0 0 1px var(--tf-green);
+    cursor: pointer;
+  }
+
+  .range-hints {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 12px;
+    color: rgba(236, 234, 232, 0.35);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Results column */
+  .results { display: flex; flex-direction: column; gap: 20px; }
+
+  .result-hero {
+    background: linear-gradient(135deg, rgba(19, 249, 123, 0.12) 0%, rgba(19, 249, 123, 0.02) 100%);
+    border: 1px solid rgba(19, 249, 123, 0.25);
+    border-radius: 18px;
+    padding: 28px 28px 24px;
+  }
+  .result-hero .label {
+    color: var(--tf-green);
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+  .result-hero .value {
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 700;
+    color: var(--tf-white);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .result-hero .sub {
+    margin-top: 10px;
+    font-size: 14px;
+    color: var(--tf-grey-dim);
+  }
+
+  .kpi-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .kpi {
+    background: rgba(236, 234, 232, 0.03);
+    border: 1px solid var(--tf-grey-line);
+    border-radius: 14px;
+    padding: 18px 20px;
+  }
+  .kpi .label {
+    color: var(--tf-grey-dim);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+  .kpi .value {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--tf-white);
+    font-variant-numeric: tabular-nums;
+  }
+  .kpi .value.green { color: var(--tf-green); }
+
+  /* Chart */
+  .chart-wrap {
+    background: rgba(236, 234, 232, 0.03);
+    border: 1px solid var(--tf-grey-line);
+    border-radius: 14px;
+    padding: 18px 14px 10px;
+    height: 220px;
+    position: relative;
+  }
+
+  /* Promise block — below the calculator, above the CTA */
+  .promise {
+    margin-top: 40px;
+    padding-top: 36px;
+    border-top: 1px solid var(--tf-grey-line);
+    text-align: center;
+  }
+  .promise-text {
+    font-size: clamp(20px, 2.4vw, 28px);
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--tf-offwhite);
+    max-width: 840px;
+    margin: 0 auto 12px;
+    letter-spacing: -0.01em;
+  }
+  .promise-text em {
+    font-style: normal;
+    color: var(--tf-green);
+    font-weight: 600;
+  }
+  .promise-text .sep {
+    color: var(--tf-green);
+    font-weight: 600;
+    margin: 0 4px;
+  }
+  .promise-tagline {
+    font-size: clamp(15px, 1.4vw, 18px);
+    font-weight: 600;
+    color: var(--tf-green);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  /* CTA */
+  .cta-bar {
+    margin-top: 28px;
+    padding-top: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+    text-align: center;
+  }
+  .cta-bar .cta-text {
+    color: var(--tf-grey-dim);
+    font-size: 15px;
+    max-width: 460px;
+  }
+  .cta-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 28px;
+    background: var(--tf-green);
+    color: var(--tf-black);
+    border: none;
+    border-radius: 999px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+  }
+  .cta-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 40px -12px rgba(19, 249, 123, 0.5);
+  }
+  .cta-button svg { width: 16px; height: 16px; }
+
+  /* Footnote */
+  .footnote {
+    margin-top: 24px;
+    font-size: 12px;
+    color: rgba(236, 234, 232, 0.35);
+    text-align: center;
+    max-width: 680px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+
+    <header>
+      <img class="logo" src="assets/tradingfreaks-logo.png" alt="TradingFreaks" />
+    </header>
+
+    <section class="hero">
+      <span class="eyebrow">· Renditerechner ·</span>
+      <h1 class="headline">Wie schnell willst du <em>frei</em> sein?</h1>
+      <p class="subheadline">Stell die Regler ein — und sieh in Echtzeit, was aus deinem Kapital werden kann. Keine Theorie. Nur Zahlen.</p>
+    </section>
+
+    <section class="calculator">
+      <div class="calc-grid">
+
+        <!-- Controls -->
+        <div class="controls">
+          <div class="control">
+            <label>
+              <span class="label-text">Startkapital</span>
+              <span class="label-value" id="lblStart">5.000<span class="unit"> €</span></span>
+            </label>
+            <input type="range" id="start" min="500" max="100000" step="500" value="5000" />
+            <div class="range-hints"><span>500 €</span><span>100.000 €</span></div>
+          </div>
+
+          <div class="control">
+            <label>
+              <span class="label-text">Monatliche Einzahlung</span>
+              <span class="label-value" id="lblMonthly">500<span class="unit"> €</span></span>
+            </label>
+            <input type="range" id="monthly" min="0" max="5000" step="50" value="500" />
+            <div class="range-hints"><span>0 €</span><span>5.000 €</span></div>
+          </div>
+
+          <div class="control">
+            <label>
+              <span class="label-text">Monatliche Rendite</span>
+              <span class="label-value" id="lblReturn">5,0<span class="unit"> %</span></span>
+            </label>
+            <input type="range" id="rate" min="0.5" max="15" step="0.1" value="5" />
+            <div class="range-hints"><span>0,5 %</span><span>15 %</span></div>
+          </div>
+
+          <div class="control">
+            <label>
+              <span class="label-text">Zeitraum</span>
+              <span class="label-value" id="lblYears">3<span class="unit"> Jahre</span></span>
+            </label>
+            <input type="range" id="years" min="1" max="20" step="1" value="3" />
+            <div class="range-hints"><span>1 Jahr</span><span>20 Jahre</span></div>
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div class="results">
+          <div class="result-hero">
+            <div class="label">Dein Endkapital</div>
+            <div class="value" id="outFinal">–</div>
+            <div class="sub" id="outSub">–</div>
+          </div>
+
+          <div class="kpi-row">
+            <div class="kpi">
+              <div class="label">Gesamtgewinn</div>
+              <div class="value green" id="outProfit">–</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Passives Einkommen / Monat*</div>
+              <div class="value" id="outPassive">–</div>
+            </div>
+          </div>
+
+          <div class="chart-wrap">
+            <canvas id="chart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="promise">
+        <p class="promise-text">
+          Wir haben <em>exakt die Strategien</em>, die dir in steigenden <span class="sep">&amp;</span> fallenden Märkten überproportionale Renditen ermöglichen.
+        </p>
+        <p class="promise-tagline">Ohne Zockerei. Wenig Zeitaufwand.</p>
+      </div>
+
+      <div class="cta-bar">
+        <div class="cta-text">Bereit, aus den Zahlen Realität zu machen?</div>
+        <a href="#" class="cta-button">
+          Jetzt starten
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+    </section>
+
+    <p class="footnote">
+      * Geschätztes passives Monatseinkommen = Endkapital × monatliche Rendite. Die dargestellten Werte sind Modellrechnungen auf Basis deiner Eingaben und stellen keine Gewinnprognose dar. Trading birgt Verlustrisiken.
+    </p>
+  </div>
+
+<script>
+  // --- Formatter ---
+  const fmtEUR = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+  const fmtEURdec = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 });
+  const fmtNum = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 });
+
+  // --- Inputs ---
+  const startEl   = document.getElementById('start');
+  const monthlyEl = document.getElementById('monthly');
+  const rateEl    = document.getElementById('rate');
+  const yearsEl   = document.getElementById('years');
+
+  // --- Labels ---
+  const lblStart   = document.getElementById('lblStart');
+  const lblMonthly = document.getElementById('lblMonthly');
+  const lblReturn  = document.getElementById('lblReturn');
+  const lblYears   = document.getElementById('lblYears');
+
+  // --- Outputs ---
+  const outFinal   = document.getElementById('outFinal');
+  const outSub     = document.getElementById('outSub');
+  const outProfit  = document.getElementById('outProfit');
+  const outPassive = document.getElementById('outPassive');
+
+  // --- Chart setup ---
+  const ctx = document.getElementById('chart').getContext('2d');
+
+  // Create gradient for area fill
+  const gradient = ctx.createLinearGradient(0, 0, 0, 220);
+  gradient.addColorStop(0, 'rgba(19, 249, 123, 0.35)');
+  gradient.addColorStop(1, 'rgba(19, 249, 123, 0.0)');
+
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Kapital',
+        data: [],
+        borderColor: '#13F97B',
+        backgroundColor: gradient,
+        borderWidth: 2.5,
+        fill: true,
+        tension: 0.3,
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: '#13F97B',
+        pointHoverBorderColor: '#060606',
+        pointHoverBorderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(6, 6, 6, 0.95)',
+          borderColor: 'rgba(19, 249, 123, 0.3)',
+          borderWidth: 1,
+          titleColor: '#ECEAE8',
+          bodyColor: '#13F97B',
+          titleFont: { family: 'Outfit', weight: '500', size: 12 },
+          bodyFont:  { family: 'Outfit', weight: '600', size: 14 },
+          padding: 12,
+          displayColors: false,
+          callbacks: {
+            title: (items) => items[0].label,
+            label: (item) => fmtEUR.format(item.parsed.y)
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: {
+            color: 'rgba(236, 234, 232, 0.45)',
+            font: { family: 'Outfit', size: 11 },
+            maxRotation: 0,
+            autoSkipPadding: 20
+          }
+        },
+        y: {
+          grid: { color: 'rgba(236, 234, 232, 0.06)' },
+          ticks: {
+            color: 'rgba(236, 234, 232, 0.45)',
+            font: { family: 'Outfit', size: 11 },
+            callback: (v) => {
+              if (v >= 1_000_000) return (v / 1_000_000).toFixed(1).replace('.', ',') + ' Mio €';
+              if (v >= 1_000)     return (v / 1_000).toFixed(0) + 'k €';
+              return v + ' €';
+            }
+          }
+        }
+      }
+    }
+  });
+
+  // --- Compute + render ---
+  function compute() {
+    const start    = parseFloat(startEl.value);
+    const monthly  = parseFloat(monthlyEl.value);
+    const ratePct  = parseFloat(rateEl.value);
+    const years    = parseInt(yearsEl.value);
+    const months   = years * 12;
+    const r        = ratePct / 100;
+
+    // Update labels
+    lblStart.innerHTML   = fmtNum.format(start)   + '<span class="unit"> €</span>';
+    lblMonthly.innerHTML = fmtNum.format(monthly) + '<span class="unit"> €</span>';
+    lblReturn.innerHTML  = ratePct.toFixed(1).replace('.', ',') + '<span class="unit"> %</span>';
+    lblYears.innerHTML   = years + '<span class="unit"> ' + (years === 1 ? 'Jahr' : 'Jahre') + '</span>';
+
+    // Simulate: each month — capital grows by r, then add monthly deposit
+    const labels = ['Start'];
+    const series = [start];
+    let capital  = start;
+    let invested = start;
+
+    for (let m = 1; m <= months; m++) {
+      capital = capital * (1 + r) + monthly;
+      invested += monthly;
+      // Only add every 3 months for readability (or every month if <=24 months)
+      if (months <= 24 || m % 3 === 0 || m === months) {
+        const y  = Math.floor(m / 12);
+        const rm = m % 12;
+        let lbl;
+        if (m === months) {
+          lbl = 'Ende';
+        } else if (months > 24) {
+          lbl = y + 'J ' + (rm > 0 ? rm + 'M' : '');
+        } else {
+          lbl = 'M ' + m;
+        }
+        labels.push(lbl.trim());
+        series.push(capital);
+      }
+    }
+
+    // Results
+    const profit  = capital - invested;
+    const passive = capital * r;
+
+    outFinal.textContent   = fmtEUR.format(capital);
+    outSub.textContent     = 'Nach ' + years + ' ' + (years === 1 ? 'Jahr' : 'Jahren') +
+                             ' · eingezahlt: ' + fmtEUR.format(invested);
+    outProfit.textContent  = '+ ' + fmtEUR.format(profit);
+    outPassive.textContent = fmtEUR.format(passive);
+
+    // Update chart
+    chart.data.labels = labels;
+    chart.data.datasets[0].data = series;
+    chart.update('none');
+  }
+
+  // Bind
+  [startEl, monthlyEl, rateEl, yearsEl].forEach(el => el.addEventListener('input', compute));
+  compute();
+</script>
+</body>
+</html>
