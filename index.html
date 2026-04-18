@@ -342,6 +342,74 @@
     margin-right: auto;
     line-height: 1.6;
   }
+
+  /* Legal / Risk disclosure */
+  .legal {
+    margin-top: 64px;
+    padding-top: 32px;
+    border-top: 1px solid var(--tf-grey-line);
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .legal-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--tf-offwhite);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    margin-bottom: 16px;
+  }
+  .legal p {
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: rgba(236, 234, 232, 0.5);
+    margin-bottom: 12px;
+  }
+  .legal a {
+    color: var(--tf-green);
+    text-decoration: none;
+    word-break: break-word;
+  }
+  .legal a:hover { text-decoration: underline; }
+
+  /* Site Footer */
+  .site-footer {
+    margin-top: 48px;
+    padding: 24px 0 8px;
+    border-top: 1px solid var(--tf-grey-line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+  }
+  .footer-links a {
+    color: rgba(236, 234, 232, 0.55);
+    text-decoration: none;
+    transition: color 0.15s ease;
+    padding: 4px 0;
+  }
+  .footer-links a:hover { color: var(--tf-green); }
+  .footer-links .sep {
+    color: rgba(236, 234, 232, 0.2);
+    margin: 0 8px;
+    user-select: none;
+  }
+  .footer-copy {
+    color: rgba(236, 234, 232, 0.35);
+    font-size: 12px;
+  }
+  @media (max-width: 600px) {
+    .site-footer { flex-direction: column; align-items: flex-start; }
+  }
 </style>
 </head>
 <body>
@@ -443,6 +511,31 @@
     <p class="footnote">
       * Geschätztes passives Monatseinkommen = Endkapital × monatliche Rendite. Die dargestellten Werte sind Modellrechnungen auf Basis deiner Eingaben und stellen keine Gewinnprognose dar. Trading birgt Verlustrisiken.
     </p>
+
+    <section class="legal">
+      <h3 class="legal-title">Risikohinweis</h3>
+
+      <p>Trading kann mit klassischen Basiswerten (Aktien, etc.) oder auch Hebelprodukten durchgeführt werden. Der Handel mit Hebelprodukten (z.&nbsp;B. CFD´s und Forex Trades) oder anderen Finanzinstrumenten ist mit einem enormen Risiko verbunden und nicht für jeden geeignet. Es besteht die Möglichkeit, dass Sie einen Totalverlust erleiden oder sogar Verluste erleiden, die Ihre Investitionen übersteigen.</p>
+
+      <p>Bevor Sie mit Hebelprodukten oder anderen Finanzinstrumenten handeln, sollten Sie sicherstellen, dass Sie alle damit verbunden Risiken verstanden haben. Im Übrigen verweisen wir auf unsere Risikohinweise auf: <a href="https://tradingfreaks.com/risikohinweis/" target="_blank" rel="noopener">https://tradingfreaks.com/risikohinweis/</a>.</p>
+
+      <p>Es wird ausdrücklich klargestellt, dass wir (TF Daytrading GmbH / www.tradingfreaks.com) keine Anlageberatung anbieten und durchführen und insbesondere auch keinerlei konkrete Empfehlungen zu einem Wertpapier, Finanzprodukt oder -Instrument abgeben. Die Erwähnung bestimmter Wertpapiere oder Anlageprodukte stellen ausdrücklich keine Empfehlung zum Kaufen oder Verkaufen oder Halten dar. Sie handeln bzw. traden auf eigenes Risiko. Jegliche Haftung wird ausgeschlossen.</p>
+
+      <p>CFDs sind komplexe Instrumente und bergen aufgrund der Hebelwirkung ein hohes Risiko, schnell Geld zu verlieren. Die große Mehrheit der Konten von Kleinanlegern verliert beim Handel mit CFDs Geld. Sie sollten abwägen, ob Sie die Funktionsweise von CFDs verstehen und ob Sie es sich leisten können, das hohe Risiko einzugehen, ihr Geld zu verlieren.</p>
+
+      <p>Kontaktieren Sie uns: <a href="mailto:info@tradingfreaks.com">info@tradingfreaks.com</a></p>
+    </section>
+
+    <footer class="site-footer">
+      <nav class="footer-links" aria-label="Rechtliches">
+        <a href="https://tradingfreaks.com/impressum" target="_blank" rel="noopener">Impressum</a>
+        <span class="sep">·</span>
+        <a href="https://tradingfreaks.com/risikohinweis" target="_blank" rel="noopener">Risikohinweis</a>
+        <span class="sep">·</span>
+        <a href="https://tradingfreaks.com/datenschutzerklaerung" target="_blank" rel="noopener">Datenschutzerklaerung</a>
+      </nav>
+      <div class="footer-copy">© 2026 TF Daytrading GmbH</div>
+    </footer>
   </div>
 
 <script>
