@@ -248,6 +248,89 @@
   .kpi .value.green { color: var(--tf-green); }
 
   /* Chart */
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chart-legend {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11.5px;
+    color: var(--tf-grey-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .chart-legend .dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .chart-legend .dot::before {
+    content: '';
+    width: 10px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--tf-green);
+  }
+  .chart-legend .dot.etf::before {
+    background: repeating-linear-gradient(90deg, rgba(236,234,232,0.7) 0 4px, transparent 4px 7px);
+  }
+
+  /* Toggle switch */
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .toggle input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+  .toggle-track {
+    position: relative;
+    width: 34px;
+    height: 18px;
+    background: rgba(236, 234, 232, 0.15);
+    border-radius: 999px;
+    transition: background 0.2s ease;
+    flex-shrink: 0;
+  }
+  .toggle-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    background: var(--tf-offwhite);
+    border-radius: 50%;
+    transition: transform 0.2s ease, background 0.2s ease;
+  }
+  .toggle input:checked + .toggle-track {
+    background: rgba(19, 249, 123, 0.35);
+  }
+  .toggle input:checked + .toggle-track .toggle-thumb {
+    transform: translateX(16px);
+    background: var(--tf-green);
+  }
+  .toggle input:focus-visible + .toggle-track {
+    box-shadow: 0 0 0 2px rgba(19, 249, 123, 0.5);
+  }
+  .toggle-label {
+    font-size: 12.5px;
+    color: var(--tf-grey-dim);
+    font-weight: 500;
+  }
+
   .chart-wrap {
     background: rgba(236, 234, 232, 0.03);
     border: 1px solid var(--tf-grey-line);
@@ -486,6 +569,17 @@
             </div>
           </div>
 
+          <div class="chart-header">
+            <div class="chart-legend">
+              <span class="dot trade">Trading</span>
+              <span class="dot etf" id="legendEtf">ETF 9&nbsp;% p.&nbsp;a.</span>
+            </div>
+            <label class="toggle" title="Vergleich mit klassischem ETF (9 % pro Jahr)">
+              <input type="checkbox" id="showEtf" checked />
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+              <span class="toggle-label">ETF-Vergleich</span>
+            </label>
+          </div>
           <div class="chart-wrap">
             <canvas id="chart"></canvas>
           </div>
@@ -564,30 +658,52 @@
 
   // --- Chart setup ---
   const ctx = document.getElementById('chart').getContext('2d');
+  const showEtfEl  = document.getElementById('showEtf');
+  const legendEtf  = document.getElementById('legendEtf');
 
   // Create gradient for area fill
   const gradient = ctx.createLinearGradient(0, 0, 0, 220);
-  gradient.addColorStop(0, 'rgba(19, 249, 123, 0.35)');
+  gradient.addColorStop(0, 'rgba(19, 249, 123, 0.3)');
   gradient.addColorStop(1, 'rgba(19, 249, 123, 0.0)');
 
   const chart = new Chart(ctx, {
     type: 'line',
     data: {
       labels: [],
-      datasets: [{
-        label: 'Kapital',
-        data: [],
-        borderColor: '#13F97B',
-        backgroundColor: gradient,
-        borderWidth: 2.5,
-        fill: true,
-        tension: 0.3,
-        pointRadius: 0,
-        pointHoverRadius: 5,
-        pointHoverBackgroundColor: '#13F97B',
-        pointHoverBorderColor: '#060606',
-        pointHoverBorderWidth: 2
-      }]
+      datasets: [
+        {
+          label: 'Trading',
+          data: [],
+          borderColor: '#13F97B',
+          backgroundColor: gradient,
+          borderWidth: 2.5,
+          fill: true,
+          tension: 0.3,
+          pointRadius: 0,
+          pointHoverRadius: 5,
+          pointHoverBackgroundColor: '#13F97B',
+          pointHoverBorderColor: '#060606',
+          pointHoverBorderWidth: 2,
+          order: 0
+        },
+        {
+          label: 'ETF (9 % p. a.)',
+          data: [],
+          borderColor: 'rgba(236, 234, 232, 0.65)',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          borderDash: [6, 4],
+          fill: false,
+          tension: 0.3,
+          pointRadius: 0,
+          pointHoverRadius: 5,
+          pointHoverBackgroundColor: 'rgba(236, 234, 232, 0.9)',
+          pointHoverBorderColor: '#060606',
+          pointHoverBorderWidth: 2,
+          hidden: false,
+          order: 1
+        }
+      ]
     },
     options: {
       responsive: true,
@@ -600,14 +716,18 @@
           borderColor: 'rgba(19, 249, 123, 0.3)',
           borderWidth: 1,
           titleColor: '#ECEAE8',
-          bodyColor: '#13F97B',
+          bodyColor: '#ECEAE8',
           titleFont: { family: 'Outfit', weight: '500', size: 12 },
-          bodyFont:  { family: 'Outfit', weight: '600', size: 14 },
+          bodyFont:  { family: 'Outfit', weight: '600', size: 13 },
           padding: 12,
-          displayColors: false,
+          displayColors: true,
+          boxWidth: 10,
+          boxHeight: 10,
+          boxPadding: 6,
+          usePointStyle: false,
           callbacks: {
             title: (items) => items[0].label,
-            label: (item) => fmtEUR.format(item.parsed.y)
+            label: (item) => ' ' + item.dataset.label + ': ' + fmtEUR.format(item.parsed.y)
           }
         }
       },
@@ -637,6 +757,9 @@
     }
   });
 
+  // ETF monthly rate = compound-equivalent of 9 % p.a.
+  const ETF_MONTHLY = Math.pow(1.09, 1 / 12) - 1; // ≈ 0.007207 (0.7207 %)
+
   // --- Compute + render ---
   function compute() {
     const start    = parseFloat(startEl.value);
@@ -644,7 +767,8 @@
     const ratePct  = parseFloat(rateEl.value);
     const years    = parseInt(yearsEl.value);
     const months   = years * 12;
-    const r        = ratePct / 100;
+    const rTrade   = ratePct / 100;
+    const rEtf     = ETF_MONTHLY;
 
     // Update labels
     lblStart.innerHTML   = fmtNum.format(start)   + '<span class="unit"> €</span>';
@@ -652,16 +776,20 @@
     lblReturn.innerHTML  = ratePct.toFixed(1).replace('.', ',') + '<span class="unit"> %</span>';
     lblYears.innerHTML   = years + '<span class="unit"> ' + (years === 1 ? 'Jahr' : 'Jahre') + '</span>';
 
-    // Simulate: each month — capital grows by r, then add monthly deposit
-    const labels = ['Start'];
-    const series = [start];
-    let capital  = start;
-    let invested = start;
+    // Simulate: each month — capital grows by rate, then add monthly deposit
+    const labels     = ['Start'];
+    const tradeSrs   = [start];
+    const etfSrs     = [start];
+    let tradeCap     = start;
+    let etfCap       = start;
+    let invested     = start;
 
     for (let m = 1; m <= months; m++) {
-      capital = capital * (1 + r) + monthly;
+      tradeCap = tradeCap * (1 + rTrade) + monthly;
+      etfCap   = etfCap   * (1 + rEtf)   + monthly;
       invested += monthly;
-      // Only add every 3 months for readability (or every month if <=24 months)
+
+      // Sample at readable intervals
       if (months <= 24 || m % 3 === 0 || m === months) {
         const y  = Math.floor(m / 12);
         const rm = m % 12;
@@ -674,15 +802,16 @@
           lbl = 'M ' + m;
         }
         labels.push(lbl.trim());
-        series.push(capital);
+        tradeSrs.push(tradeCap);
+        etfSrs.push(etfCap);
       }
     }
 
-    // Results
-    const profit  = capital - invested;
-    const passive = capital * r;
+    // Results (based on Trading scenario)
+    const profit  = tradeCap - invested;
+    const passive = tradeCap * rTrade;
 
-    outFinal.textContent   = fmtEUR.format(capital);
+    outFinal.textContent   = fmtEUR.format(tradeCap);
     outSub.textContent     = 'Nach ' + years + ' ' + (years === 1 ? 'Jahr' : 'Jahren') +
                              ' · eingezahlt: ' + fmtEUR.format(invested);
     outProfit.textContent  = '+ ' + fmtEUR.format(profit);
@@ -690,12 +819,20 @@
 
     // Update chart
     chart.data.labels = labels;
-    chart.data.datasets[0].data = series;
+    chart.data.datasets[0].data = tradeSrs;
+    chart.data.datasets[1].data = etfSrs;
+    chart.data.datasets[1].hidden = !showEtfEl.checked;
     chart.update('none');
+  }
+
+  function toggleEtfLegend() {
+    legendEtf.style.opacity = showEtfEl.checked ? '1' : '0.3';
   }
 
   // Bind
   [startEl, monthlyEl, rateEl, yearsEl].forEach(el => el.addEventListener('input', compute));
+  showEtfEl.addEventListener('change', () => { toggleEtfLegend(); compute(); });
+  toggleEtfLegend();
   compute();
 </script>
 </body>
